@@ -870,7 +870,7 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def extract_info(url: str) -> dict:
     def _run():
-        opts = {"quiet": True, "no_warnings": True, "ffmpeg_location": FFMPEG_PATH}
+        opts = {"quiet": True, "no_warnings": True, "ffmpeg_location": FFMPEG_PATH, "extractor_args": {"youtube": {"player_client": ["android"]}}}
         if os.path.exists(COOKIES_PATH):
             opts["cookiefile"] = COOKIES_PATH
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -1165,6 +1165,7 @@ async def download(chat_id: int, msg_id: int, url: str, fmt: str, context: Conte
         "ffmpeg_location": FFMPEG_PATH,
         "max_filesize": MAX_FILE_SIZE,
         "progress_hooks": [_make_hook(chat_id, msg_id)],
+        "extractor_args": {"youtube": {"player_client": ["android"]}},
     }
 
     if os.path.exists(COOKIES_PATH):
