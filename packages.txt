@@ -1,3 +1,0 @@
-ffmpeg
-fontconfig
-fonts-dejavu-core
