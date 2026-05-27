@@ -880,12 +880,6 @@ async def extract_info(url: str) -> dict:
             "quiet": True,
             "no_warnings": True,
             "ffmpeg_location": FFMPEG_PATH,
-            "source_address": "0.0.0.0",
-            "extractor_args": {
-                "youtube": {"player_skip": ["webpage", "configs"], "player_client": ["android", "web"]},
-                "youtubetab": {"skip": ["webpage"]},
-            },
-            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         }
         if os.path.exists(COOKIES_PATH):
             opts["cookiefile"] = COOKIES_PATH
@@ -1181,12 +1175,6 @@ async def download(chat_id: int, msg_id: int, url: str, fmt: str, context: Conte
         "ffmpeg_location": FFMPEG_PATH,
         "max_filesize": MAX_FILE_SIZE,
         "progress_hooks": [_make_hook(chat_id, msg_id)],
-        "source_address": "0.0.0.0",
-        "extractor_args": {
-            "youtube": {"player_skip": ["webpage", "configs"], "player_client": ["android", "web"]},
-            "youtubetab": {"skip": ["webpage"]},
-        },
-        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
 
     if os.path.exists(COOKIES_PATH):
@@ -1460,12 +1448,6 @@ async def download_video_with_info(url: str) -> tuple[str | None, dict | None]:
         "quiet": True,
         "no_warnings": True,
         "ffmpeg_location": FFMPEG_PATH,
-        "source_address": "0.0.0.0",
-        "extractor_args": {
-            "youtube": {"player_skip": ["webpage", "configs"], "player_client": ["android", "web"]},
-            "youtubetab": {"skip": ["webpage"]},
-        },
-        "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
     def _dl():
         with yt_dlp.YoutubeDL(opts) as ydl:
