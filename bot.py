@@ -1563,6 +1563,10 @@ async def main_async():
         await app.start()
         await app.updater.start_polling()
         app.create_task(scheduler_loop(app))
+        try:
+            await app.bot.send_message(chat_id=ADMIN_ID, text="✅ *Bot Online!*\nBot udah hidup 24 jam di Railway.")
+        except Exception:
+            pass
         print("Bot berjalan dengan fitur baru...")
         while True:
             await asyncio.sleep(3600)
