@@ -778,7 +778,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Format salah. Kirim jam *HH:MM* (contoh: `14:30`)")
         return
 
-    # Normal: try URL
+    # Normal: try URL, if no URL found, show menu
+    if not extract_url(text):
+        await show_menu(update, context)
+        return
     await handle_url(update, context)
 
 
