@@ -1393,6 +1393,13 @@ async def clip_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     msg = await update.message.reply_text("Mendownload & menganalisis...")
 
+    # cek ffmpeg
+    try:
+        subprocess.run([FFMPEG_PATH, "-version"], capture_output=True, timeout=10)
+    except Exception:
+        await msg.edit_text("❌ ffmpeg gak tersedia di server. Hubungi admin.")
+        return
+
     try:
         filepath, info = await download_video_with_info(url)
         if filepath is None:
@@ -1400,10 +1407,15 @@ async def clip_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         await msg.edit_text("Membuat klip dengan judul...")
-        clip_paths = await create_clips(filepath, info)
+        try:
+            clip_paths = await create_clips(filepath, info)
+        except Exception as clip_err:
+            await msg.edit_text(f"Gagal bikin klip: {str(clip_err)[:150]}")
+            os.remove(filepath)
+            return
 
         if not clip_paths:
-            await msg.edit_text("Gagal membuat klip.")
+            await msg.edit_text("Gagal membuat klip: durasi terlalu pendek atau error ffmpeg.")
             os.remove(filepath)
             return
 
