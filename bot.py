@@ -14,6 +14,8 @@ import requests
 import yt_dlp
 
 # Load .env
+import os
+
 _env = {}
 _env_path = Path(__file__).parent / ".env"
 if _env_path.exists():
@@ -23,10 +25,13 @@ if _env_path.exists():
             _k, _v = _line.split("=", 1)
             _env[_k.strip()] = _v.strip()
 
-TOKEN = _env.get("TOKEN", "")
-ADMIN_ID = int(_env.get("ADMIN_ID", "0"))
-GOPAY = _env.get("GOPAY", "085809117547")
-QRIS_PATH = str(Path(__file__).parent / _env.get("QRIS_FILE", "qris.png"))
+def _env_get(key: str, default: str = "") -> str:
+    return os.environ.get(key) or _env.get(key) or default
+
+TOKEN = _env_get("TOKEN")
+ADMIN_ID = int(_env_get("ADMIN_ID", "0"))
+GOPAY = _env_get("GOPAY", "085809117547")
+QRIS_PATH = str(Path(__file__).parent / _env_get("QRIS_FILE", "qris.png"))
 PRICE = 25000
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, Update
 from telegram.ext import (
