@@ -876,7 +876,14 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def extract_info(url: str) -> dict:
     def _run():
-        opts = {"quiet": True, "no_warnings": True, "ffmpeg_location": FFMPEG_PATH, "extractor_args": {"youtube": {"player_client": ["android_embedded", "android", "ios"]}}, "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+        opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "ffmpeg_location": FFMPEG_PATH,
+            "source_address": "0.0.0.0",
+            "extractor_args": {"youtube": {"player_client": ["tv", "android_embedded", "android"], "skip": ["webpage"]}},
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        }
         if os.path.exists(COOKIES_PATH):
             opts["cookiefile"] = COOKIES_PATH
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -1171,7 +1178,8 @@ async def download(chat_id: int, msg_id: int, url: str, fmt: str, context: Conte
         "ffmpeg_location": FFMPEG_PATH,
         "max_filesize": MAX_FILE_SIZE,
         "progress_hooks": [_make_hook(chat_id, msg_id)],
-        "extractor_args": {"youtube": {"player_client": ["android_embedded", "android", "ios"]}},
+        "source_address": "0.0.0.0",
+        "extractor_args": {"youtube": {"player_client": ["tv", "android_embedded", "android"], "skip": ["webpage"]}},
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
 
@@ -1446,7 +1454,8 @@ async def download_video_with_info(url: str) -> tuple[str | None, dict | None]:
         "quiet": True,
         "no_warnings": True,
         "ffmpeg_location": FFMPEG_PATH,
-        "extractor_args": {"youtube": {"player_client": ["android_embedded", "android", "ios"]}},
+        "source_address": "0.0.0.0",
+        "extractor_args": {"youtube": {"player_client": ["tv", "android_embedded", "android"], "skip": ["webpage"]}},
         "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     }
     def _dl():
