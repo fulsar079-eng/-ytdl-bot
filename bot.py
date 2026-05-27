@@ -56,6 +56,7 @@ FFMPEG_PATH = str(BASE_DIR / "ffmpeg" / "ffmpeg.exe")
 FONT_PATH = "C:/Windows/Fonts/arial.ttf"
 MAX_FILE_SIZE = 50 * 1024 * 1024
 DB_PATH = str(BASE_DIR / "bot.db")
+COOKIES_PATH = str(BASE_DIR / "cookies.txt")
 
 URL_PATTERN = re.compile(
     r"https?://(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)",
@@ -666,6 +667,19 @@ async def cmd_broadcast(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"✅ Broadcast terkirim ke {sent} user.")
 
 
+async def cmd_setcookies(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    await update.message.reply_text(
+        "📤 *Kirim file cookies.txt*\n\n"
+        "Cara dapatin cookies:\n"
+        "1. Install ekstensi 'Get cookies.txt' di Chrome\n"
+        "2. Login ke YouTube di Chrome\n"
+        "3. Klik ekstensi → Export cookies\n"
+        "4. Kirim file cookies.txt ke sini"
+    )
+
+
 # ── Handle incoming text (URL or schedule time) ──
 
 async def handle_menu_action(update: Update, context: ContextTypes.DEFAULT_TYPE, act: str):
@@ -856,7 +870,10 @@ async def handle_url(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def extract_info(url: str) -> dict:
     def _run():
-        with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True, "ffmpeg_location": FFMPEG_PATH}) as ydl:
+        opts = {"quiet": True, "no_warnings": True, "ffmpeg_location": FFMPEG_PATH}
+        if os.path.exists(COOKIES_PATH):
+            opts["cookiefile"] = COOKIES_PATH
+        with yt_dlp.YoutubeDL(opts) as ydl:
             return ydl.extract_info(url, download=False)
     return await asyncio.to_thread(_run)
 
@@ -1149,6 +1166,9 @@ async def download(chat_id: int, msg_id: int, url: str, fmt: str, context: Conte
         "max_filesize": MAX_FILE_SIZE,
         "progress_hooks": [_make_hook(chat_id, msg_id)],
     }
+
+    if os.path.exists(COOKIES_PATH):
+        opts["cookiefile"] = COOKIES_PATH
 
     if fmt == "audio":
         opts["postprocessors"] = [{
@@ -1535,6 +1555,20 @@ async def scheduler_loop(app: Application):
         await asyncio.sleep(30)
 
 
+# ── Cookies file handler ──
+
+async def handle_cookies_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if update.effective_user.id != ADMIN_ID:
+        return
+    doc = update.message.document
+    if not doc.file_name or not doc.file_name.endswith(".txt"):
+        await update.message.reply_text("Kirim file .txt")
+        return
+    file = await doc.get_file()
+    await file.download_to_drive(COOKIES_PATH)
+    await update.message.reply_text("✅ Cookies tersimpan! YouTube sekarang bisa dipake.")
+
+
 # ── Main ──
 
 async def main_async():
@@ -1558,9 +1592,11 @@ async def main_async():
     app.add_handler(CommandHandler("broadcast", cmd_broadcast))
     app.add_handler(CommandHandler("clip", clip_command))
     app.add_handler(CommandHandler("fb", cmd_fb))
+    app.add_handler(CommandHandler("setcookies", cmd_setcookies))
     app.add_handler(CallbackQueryHandler(handle_callback))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
+    app.add_handler(MessageHandler(filters.Document.FileExtension("txt"), handle_cookies_file))
 
     async with app:
         await app.start()
