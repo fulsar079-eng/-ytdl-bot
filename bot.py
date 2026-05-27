@@ -52,8 +52,14 @@ SCHEDULE_DIR = DOWNLOAD_DIR / "scheduled"
 for d in [DOWNLOAD_DIR, CLIPS_DIR, SCHEDULE_DIR]:
     d.mkdir(exist_ok=True)
 
-FFMPEG_PATH = str(BASE_DIR / "ffmpeg" / "ffmpeg.exe")
-FONT_PATH = "C:/Windows/Fonts/arial.ttf"
+_ffmpeg_local = str(BASE_DIR / "ffmpeg" / "ffmpeg.exe")
+FFMPEG_PATH = _ffmpeg_local if os.path.exists(_ffmpeg_local) else "ffmpeg"
+FONT_PATH = "C:/Windows/Fonts/arial.ttf" if os.name == "nt" else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+if not os.path.exists(FONT_PATH):
+    for _p in ["/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf", "/usr/share/fonts/TTF/DejaVuSans.ttf", "/System/Library/Fonts/Helvetica.ttc"]:
+        if os.path.exists(_p):
+            FONT_PATH = _p
+            break
 MAX_FILE_SIZE = 50 * 1024 * 1024
 DB_PATH = str(BASE_DIR / "bot.db")
 COOKIES_PATH = str(BASE_DIR / "cookies.txt")
@@ -1427,6 +1433,7 @@ async def download_video_with_info(url: str) -> tuple[str | None, dict | None]:
         "quiet": True,
         "no_warnings": True,
         "ffmpeg_location": FFMPEG_PATH,
+        "extractor_args": {"youtube": {"player_client": ["android"]}},
     }
     def _dl():
         with yt_dlp.YoutubeDL(opts) as ydl:
@@ -1490,7 +1497,7 @@ async def create_clips(video_path: str, info: dict) -> list[str]:
             if not os.path.exists(clip_no_overlay) or os.path.getsize(clip_no_overlay) == 0:
                 continue
 
-            if safe_title:
+            if safe_title and os.path.exists(FONT_PATH):
                 vf = (
                     f"drawtext=fontfile={FONT_PATH}:"
                     f"text={safe_title}:"
